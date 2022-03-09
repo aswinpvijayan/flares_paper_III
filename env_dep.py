@@ -10,6 +10,7 @@ from functools import partial
 import matplotlib, sys, h5py, schwimmbad
 from uncertainties import unumpy
 matplotlib.rcParams['text.usetex'] = True
+matplotlib.rcParams['legend.fancybox'] = False
 import matplotlib.pyplot as plt
 import astropy.constants as const
 import astropy.units as u

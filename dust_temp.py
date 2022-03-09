@@ -10,6 +10,7 @@ from functools import partial
 import matplotlib, sys, h5py, re, schwimmbad
 from uncertainties import unumpy
 matplotlib.rcParams['text.usetex'] = True
+matplotlib.rcParams['legend.fancybox'] = False
 import matplotlib.pyplot as plt
 from astropy.io import fits
 from lmfit import Model
@@ -54,10 +55,10 @@ def plot_T_obs(axs, z, plt):
         # axs.errorbar(Strandet_z, Strandet_T, yerr=Strandet_Terr, color='violet', ls='None', marker='s', markersize=4, alpha=0.3, label='Strandet+2016')
 
         axs.errorbar(Faisst_z, Faisst_Tpeak, yerr=Faisst_Tpeakerr, color='orange', ls='None', marker='o', label='Faisst+2020', markersize=4, alpha=0.3)
-        axs.errorbar(Faisst_z, Faisst_TMBB, yerr=Faisst_TMBBerr, color='orange', ls='None', marker='s', markersize=4, alpha=0.3)
+        axs.errorbar(Faisst_z, Faisst_TMBB, yerr=Faisst_TMBBerr, color='orange', ls='None', marker='D', markersize=4, alpha=0.3)
         # axs.errorbar(Faisst_z, Faisst_TMBB, yerr=Faisst_TMBBerr, color='orange', ls='None', marker='s', markersize=4, alpha=0.3, label='Faisst+2020')
 
-        axs.errorbar(Jin_z, Jin_TMBB, yerr=Jin_TMBBerr, color='olive', ls='None', marker='s', label='Jin+2019', markersize=4, alpha=0.3)
+        axs.errorbar(Jin_z, Jin_TMBB, yerr=Jin_TMBBerr, color='olive', ls='None', marker='D', label='Jin+2019', markersize=4, alpha=0.3)
 
 
 
@@ -75,7 +76,7 @@ def plot_T_obs(axs, z, plt):
 
         axs.errorbar([8.3113], [80], yerr=[5.], lolims=[1], color='yellow', ls='None', label='Bakx+2020', marker='s', markersize=4, alpha=0.3)
 
-        axs.errorbar([4.5, 5.5], [41., 43.], yerr=[1., 5.], color='magenta', ls='None', label='Bethermin+2020 (Stacked)', marker='s', markersize=8, alpha=0.3)
+        axs.errorbar([4.5, 5.5], [41., 43.], yerr=[1., 5.], color='limegreen', ls='None', label='Bethermin+2020 (Stacked)', marker='s', markersize=8, alpha=0.3)
 
     if plt=='Lir':
         axs.errorbar(Faisst_Lir, Faisst_lampeak, xerr=Faisst_Lirerr, yerr=Faisst_lampeakerr, color='orange', ls='None', marker='o', label='Faisst+2020 ($z \sim 5.5$)', markersize=4, alpha=0.7)
@@ -128,6 +129,9 @@ def Tpeak_fit(z, alpha, beta):
 
     return alpha + beta*(z-5.)
 
+def T_fit_exp(z, alpha, beta):
+
+    return alpha*((1.+z)**beta)
 
 def plt_median(x, y, bins, ws, ax, ii):
 
@@ -238,12 +242,10 @@ if __name__ == "__main__":
 
 
             zs = np.append(zs, z)
-            # print ("Tpeak: ", np.nanmin(Tpeaks), np.nanmax(Tpeaks))
-            # print ("TMBB: ", np.nanmin(T_MBBs), np.nanmax(T_MBBs))
-            # print ("TMBBerr: ", np.nanmin(T_MBBerrs), np.nanmax(T_MBBerrs))
-            # print ("TMBB,RJ: ", np.nanmin(T_MBBs1), np.nanmax(T_MBBs1))
-            # print ("TMBBerr,RJ: ", np.nanmin(T_MBBerrs1), np.nanmax(T_MBBerrs1))
-            # # ws = np.ones(len(ws))
+            print ("z:", z)
+            print ("Tpeak: ", np.nanmin(Tpeak), np.nanmax(Tpeak))
+            print ("TSED: ", np.nanmin(TSED), np.nanmax(TSED))
+            print ("TSED,RJ: ", np.nanmin(TSEDRJ), np.nanmax(TSEDRJ))
 
             out = flares.binned_weighted_quantile(np.ones(len(TSED))*z, TSED, ws, [z-1,z+1], quantiles)
             med_TSED[ii][0], med_TSED[ii][1], med_TSED[ii][2] = out[1], out[1]-out[2], out[0]-out[1]
@@ -261,7 +263,7 @@ if __name__ == "__main__":
 
     if inp!=0:
 
-        axs.errorbar(zs, med_TSED[:,0], yerr=TSEDerr, color='grey', alpha=0.25, marker='s', label='\\textsc{Flares}: ' + r'T$_{\mathrm{SED}}$')
+        axs.errorbar(zs, med_TSED[:,0], yerr=TSEDerr, color='grey', alpha=0.25, marker='D', label='\\textsc{Flares}: ' + r'T$_{\mathrm{SED}}$')
         axs.fill_between(zs, med_TSED[:,0]-med_TSED[:,1], med_TSED[:,0]+med_TSED[:,2], color='grey', alpha=0.1)
 
 
@@ -274,7 +276,12 @@ if __name__ == "__main__":
 
         popt, pcov = curve_fit(Tpeak_fit, zs, med_Tpeak[:,0], p0=[33, 4], sigma=Tpeakerr)
 
-        print (popt, pcov)
+        print ('Normal fit to Tpeak:', popt, pcov)
+
+
+        popt, pcov = curve_fit(T_fit_exp, zs, med_TSEDRJ[:,0], p0=[1.5, 0.5], sigma=TSEDRJerr)
+
+        print ('Exponential fit to TSED,RJ:', popt, pcov)
 
         plot_T_obs(axs, z, 'z')
         plot_Tpeak_fit_z(axs)
@@ -337,14 +344,6 @@ if __name__ == "__main__":
         axs[1].set_xlim(8.9,12.9)
         axs[2].set_xlim(-2.1,1.5)
 
-        twinax = axs[-1].twinx()
-        twinax.set_ylim(2.898e3/30, 2.898e3/130)
-        twinax.tick_params(axis="y",direction="in")
-        twinax.set_ylabel(r'T$_{\mathrm{peak}}$/K', fontsize=14)
-        for label in (twinax.get_yticklabels()):
-            label.set_fontsize(13)
-
-        fig.subplots_adjust(wspace=0, hspace=0, right=0.89)
 
         for ax in axs:
             ax.set_ylim(30,130)
@@ -359,6 +358,16 @@ if __name__ == "__main__":
                 label.set_fontsize(13)
 
 
+        twinax = axs[-1].twinx()
+        twinax.set_ylim(2.898e3/30, 2.898e3/130)
+        twinax.tick_params(axis="y",direction="in")
+        twinax.set_ylabel(r'T$_{\mathrm{peak}}$/K', fontsize=14)
+        twinax.grid(False)
+        for label in (twinax.get_yticklabels()):
+            label.set_fontsize(13)
+
+
+        fig.subplots_adjust(wspace=0, hspace=0, right=0.89)
 
         cbaxes = fig.add_axes([0.94, 0.35, 0.01, 0.3])
         cbar = fig.colorbar(s_m, cax=cbaxes)

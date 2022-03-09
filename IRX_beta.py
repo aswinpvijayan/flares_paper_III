@@ -11,6 +11,7 @@ import matplotlib, sys, h5py, schwimmbad
 import glob, os.path, re
 from uncertainties import unumpy
 matplotlib.rcParams['text.usetex'] = True
+matplotlib.rcParams['legend.fancybox'] = False
 import matplotlib.pyplot as plt
 from astropy import units as u
 from astropy import constants as const
@@ -49,30 +50,53 @@ def plot_IRX_beta_obs(axs, z):
 
     #https://arxiv.org/pdf/1503.07596.pdf Capak et al. 2015
     #https://arxiv.org/pdf/1707.02980.pdf Bariˇsic et al. 2017
+    #https://arxiv.org/abs/1806.05603 Casey et al. 2018
 
     #Capak2015
-    Cz = np.array([5.690, 5.670, 5.546, 5.540, 5.310, 5.310, 5.310, 5.310, 5.310, 5.250, 5.148, 5.148, 5.548, 5.659, 5.659])
-    Luv = np.array([11.21, 11.15, 11.08, 11.28, 11.45, 11.47, 11.11, 11.00, 10.81, 11.05, 11.04, 10.57, 10.95, 11.14, 10.23])
-    Luv_err = np.array([0.01, 0.01, 0.01, 0.01, 0.01, 0.1, 0.07, 0.07, 0.07, 0.02, 0.02, 0.04, 0.02, 0.02, 0.05])
-    LUV = unumpy.uarray(Luv, Luv_err)
-    Lir = np.array([10.32, 10.30, 10.53, 11.13, 10.30, 11.13, 10.26, 10.87, 10.79, 10.35, 10.26, 10.26, 11.54, 11.94, 11.64])
-    Lir_err = np.array([0.2, 0.2, 0.2, 0.54, 0.2, 0.23, 0.23, 0.23, 0.23, 0.2, 0.2, 0.2, 0.19, 0.08, 0.08])
-    LIR = unumpy.uarray(Lir, Lir_err)
+    # Cz = np.array([5.690, 5.670, 5.546, 5.540, 5.310, 5.310, 5.310, 5.310, 5.310, 5.250, 5.148, 5.148, 5.548, 5.659, 5.659])
+    # Luv = np.array([11.21, 11.15, 11.08, 11.28, 11.45, 11.47, 11.11, 11.00, 10.81, 11.05, 11.04, 10.57, 10.95, 11.14, 10.23])
+    # Luv_err = np.array([0.01, 0.01, 0.01, 0.01, 0.01, 0.1, 0.07, 0.07, 0.07, 0.02, 0.02, 0.04, 0.02, 0.02, 0.05])
+    # LUV = unumpy.uarray(Luv, Luv_err)
+    # Lir = np.array([10.32, 10.30, 10.53, 11.13, 10.30, 11.13, 10.26, 10.87, 10.79, 10.35, 10.26, 10.26, 11.54, 11.94, 11.64])
+    # Lir_err = np.array([0.2, 0.2, 0.2, 0.54, 0.2, 0.23, 0.23, 0.23, 0.23, 0.2, 0.2, 0.2, 0.19, 0.08, 0.08])
+    # LIR = unumpy.uarray(Lir, Lir_err)
+    #
+    # IRX = LIR - LUV
+    # IRX_uplim = np.ones(len(Lir_err))
+    # IRX_uplim[Lir_err!=0] = 0
+    #
+    # beta = np.array([-1.92, -1.82, -1.72, -2.06, -1.01, -1.14, -0.59, -1.50, -1.30, -1.39, -1.42, -0.10, -1.59, -1.92, -1.47])
+    # beta_up = np.array([0.14, 0.10, 0.12, 0.13, 0.06, 0.12, 1.05, 1.05, 0.51, 0.15, 0.19, 0.29, 0.22, 0.24, 0.77])
+    # beta_low = np.array([0.11, 0.10, 0.15, 0.15, 0.12, 0.14, 1.12, 1.22, 0.37, 0.17, 0.18, 0.29, 0.23, 0.17, 0.44])
 
-    IRX = LIR - LUV
-    IRX_uplim = np.ones(len(Lir_err))
-    IRX_uplim[Lir_err!=0] = 0
+    data = np.genfromtxt('Obs_data/capak_remeasured_irxb_casey18b.txt', names=True)
+    Cz = data['z']
+    IRX = data['irx']
+    IRX_up = data['irx_u68']
+    IRX_low = data['irx_l68']
+    beta = np.array([-1.92, -1.82, -1.72, -2.06, -1.01, -1.14, -1.39, -1.42, -1.59, -1.92])
+    beta_up = np.array([0.14, 0.10, 0.12, 0.13, 0.06, 0.12, 0.15, 0.19, 0.22, 0.24])
+    beta_low = np.array([0.11, 0.10, 0.15, 0.15, 0.12, 0.14, 0.17, 0.18, 0.23, 0.17])
 
-    beta = np.array([-1.92, -1.82, -1.72, -2.06, -1.01, -1.14, -0.59, -1.50, -1.30, -1.39, -1.42, -0.10, -1.59, -1.92, -1.47])
-    beta_up = np.array([0.14, 0.10, 0.12, 0.13, 0.06, 0.12, 1.05, 1.05, 0.51, 0.15, 0.19, 0.29, 0.22, 0.24, 0.77])
-    beta_low = np.array([0.11, 0.10, 0.15, 0.15, 0.12, 0.14, 1.12, 1.22, 0.37, 0.17, 0.18, 0.29, 0.23, 0.17, 0.44])
+    IRX_uplim = np.ones(len(Cz))
+    IRX_uplim[IRX_low!=-99.] = 0
+    # beta_lolim = np.ones(len(Cz))
+    # beta_lolim[beta_up!=-99.] = 0
+
+    IRX_up = IRX_up - IRX
+    IRX_low = IRX - IRX_low
+    IRX_low[IRX_low>10.] = 0.2
+    # beta_up = beta_up - beta
+    # beta_low = beta - beta_low
+    # beta_up[beta_up>10.] = 0.2
+
 
     zok = np.logical_and(Cz>=z-0.5, Cz<=z+0.5)
     if np.sum(zok)>0:
-        ok = IRX_uplim[zok]==1
-        axs.errorbar(beta[zok][ok], unumpy.nominal_values(IRX[zok])[ok], xerr=[beta_low[zok][ok], beta_up[zok][ok]], yerr=unumpy.std_devs(IRX[zok])[ok], uplims=IRX_uplim[zok][ok], ls='None', color='brown', markersize=1, marker='s')
+        # ok = IRX_uplim[zok]==1
+        axs.errorbar(beta[zok], IRX[zok], xerr=[beta_low[zok], beta_up[zok]], yerr=[IRX_low[zok], IRX_up[zok]], uplims=IRX_uplim[zok], ls='None', color='brown', markersize=2, marker='s', label = 'Capak+2015')
 
-        axs.errorbar(beta[zok][~ok], unumpy.nominal_values(IRX[zok])[~ok], xerr=[beta_low[zok][~ok], beta_up[zok][~ok]], yerr=unumpy.std_devs(IRX[zok])[~ok], ls='None', label = 'Capak+2015', color='brown', markersize=1, marker='s')
+        # axs.errorbar(beta[zok][~ok], unumpy.nominal_values(IRX[zok])[~ok], xerr=[beta_low[zok][~ok], beta_up[zok][~ok]], yerr=unumpy.std_devs(IRX[zok])[~ok], ls='None', label = 'Capak+2015', color='brown', markersize=1, marker='s')
 
     # fud_data = np.genfromtxt('fudamoto2020_IRX_beta.txt', delimiter=',')
     # ok = (fud_data[:,-1]==0)
@@ -80,6 +104,7 @@ def plot_IRX_beta_obs(axs, z):
     #
     # axs.errorbar(fud_data[:,1][ok], fud_data[:,3][ok] - fud_data[:,2][ok], xerr = np.ones(np.sum(ok))*0.25, yerr = np.ones(np.sum(ok))*0.15, label=r'Fudamoto et al. (2020) ($z\sim 5$)', marker='o', color='orange', ls='None', markersize=2)
 
+    # Bouwens+2020
     y = np.array([1.54, 0.12, 30.26, 10.65])
     yerr_up = np.log10(y + np.array([0.95, 0.74, 1.73, 4.66])) - np.log10([0.95, 0.74, 1.73, 4.66])
     yerr_up[1] = 0
@@ -189,7 +214,7 @@ def plot_IRX_mstar_obs(axs, z):
 
     ok = np.logical_and(ALPINEz>z-0.5, ALPINEz<z+0.5)
     if np.sum(ok)>0:
-        axs.errorbar(mstar[ok], IRX[ok], xerr=[mstar_lo[ok], mstar_up[ok]], yerr=IRX_err[ok], uplims=Lir_uplim[ok], color='grey', ls='None', markersize=1, marker='s', label='ALPINE', alpha=0.3)
+        axs.errorbar(mstar[ok], IRX[ok], xerr=[mstar_lo[ok], mstar_up[ok]], yerr=IRX_err[ok], uplims=Lir_uplim[ok], color='grey', ls='None', markersize=1, marker='s', label='ALPINE', alpha=0.4)
 
 
     return axs

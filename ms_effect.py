@@ -11,6 +11,7 @@ from functools import partial
 import matplotlib, sys, h5py, re, schwimmbad
 from uncertainties import unumpy
 matplotlib.rcParams['text.usetex'] = True
+matplotlib.rcParams['legend.fancybox'] = False
 import matplotlib.pyplot as plt
 from astropy.io import fits
 from lmfit import Model
@@ -180,6 +181,7 @@ if __name__ == "__main__":
     twinax.set_ylim(2.898e3/30, 2.898e3/130)
     twinax.tick_params(axis="y",direction="in")
     twinax.set_ylabel(r'T$_{\mathrm{peak}}$/K', fontsize=14)
+    twinax.grid(False)
     for label in (twinax.get_yticklabels()):
         label.set_fontsize(13)
 

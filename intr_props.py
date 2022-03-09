@@ -8,6 +8,7 @@ import numpy as np
 from functools import partial
 import schwimmbad, h5py, matplotlib, timeit, sys
 matplotlib.rcParams['text.usetex'] = True
+matplotlib.rcParams['legend.fancybox'] = False
 import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set_context("paper")

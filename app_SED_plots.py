@@ -8,6 +8,7 @@ Requires the SEDs of galaxies which is not provided.
 import numpy as np
 import matplotlib, sys, h5py
 matplotlib.rcParams['text.usetex'] = True
+matplotlib.rcParams['legend.fancybox'] = False
 import matplotlib.pyplot as plt
 from scipy import integrate
 from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
