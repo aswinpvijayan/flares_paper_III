@@ -13,3 +13,5 @@ The data required to make the plots are in the folder ```data``` as ```flares_sk
 * Figure A1 and A2 -- ```app_SED_plots.py```
 * Figure C1 and E1 -- ```app_plots.py```
 * Figure D1 -- ```ms_effect.py```  
+
+Please cite this paper if you do end up using the data provided here. 
